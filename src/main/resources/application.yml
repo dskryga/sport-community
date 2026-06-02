@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: spoc
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/spoc
+    username: dbuser
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+        format_sql: true
+
+app:
+  jwt:
+    secret: jTexB946VXnIS3diqLDQin52T1bCy8Tj
+    expiration-ms: 86400000 # 24 ????
+
+logging:
+  level:
+    ru.skriagin: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
