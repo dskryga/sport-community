@@ -2,10 +2,13 @@ spring:
   application:
     name: spoc
 
+  liquibase:
+    enabled: false
+
   datasource:
-    url: jdbc:postgresql://localhost:5433/spoc
+    url: jdbc:postgresql://localhost:5433/community
     username: dbuser
-    password: password
+    password: 12345
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -14,13 +17,13 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
 app:
   jwt:
     secret: jTexB946VXnIS3diqLDQin52T1bCy8Tj
-    expiration-ms: 86400000 # 24 ????
+    expiration-ms: 86400000 # 24 hours
 
 logging:
   level:
