@@ -3,7 +3,7 @@ spring:
     name: spoc
 
   liquibase:
-    enabled: false
+    enabled: true
 
   datasource:
     url: jdbc:postgresql://localhost:5433/community
