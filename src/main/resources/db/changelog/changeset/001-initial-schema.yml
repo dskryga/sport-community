@@ -5,6 +5,7 @@ databaseChangeLog:
       changes:
         - sql:
             sql: CREATE EXTENSION IF NOT EXISTS postgis;
+      dbms: postgresql
 
   - changeSet:
       id: initial-schema
