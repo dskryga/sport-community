@@ -1,6 +1,7 @@
 package ru.skriagin.community.service.category;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.skriagin.community.dto.category.CategoryCreateDto;
 import ru.skriagin.community.dto.category.CategoryResponseDto;
@@ -11,6 +12,7 @@ import ru.skriagin.community.repository.CategoryRepository;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
@@ -20,13 +22,18 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponseDto createCategory(CategoryCreateDto categoryCreateDto) {
         Category createCategory = categoryMapper.toEntity(categoryCreateDto);
-        return categoryMapper.toResponseDto(categoryRepository.save(createCategory));
+        createCategory = categoryRepository.save(createCategory);
+        log.info("Категория с id {} сохранена", createCategory.getId());
+        return categoryMapper.toResponseDto(createCategory);
     }
 
     @Override
     public CategoryResponseDto getCategory(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Category", id));
+                .orElseThrow(() -> {
+                    log.info("Категория с id {} не найдена", id);
+                    return new EntityNotFoundException("Category", id);
+                });
         return categoryMapper.toResponseDto(category);
     }
 }

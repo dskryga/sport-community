@@ -1,6 +1,7 @@
 package ru.skriagin.community.service.event;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
@@ -14,7 +15,8 @@ import ru.skriagin.community.repository.EventRepository;
 
 @Service
 @RequiredArgsConstructor
-public class EventServiceImpl implements EventService{
+@Slf4j
+public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
@@ -24,10 +26,15 @@ public class EventServiceImpl implements EventService{
     @Override
     public EventResponseDto createEvent(EventCreateDto eventCreateDto) {
         Category category = categoryRepository.findById(eventCreateDto.getCategoryId())
-                .orElseThrow(() -> new EntityNotFoundException("Category", eventCreateDto.getCategoryId()));
+                .orElseThrow(() -> {
+                    log.info("Категория с id {} не найдена. Событие создать невозможно", eventCreateDto.getCategoryId());
+                    return new EntityNotFoundException("Category", eventCreateDto.getCategoryId());
+                });
 
         Event event = eventMapper.toEntity(eventCreateDto, category);
         Event saved = eventRepository.save(event);
+
+        log.info("Событие с id {} сохранено", event.getId());
 
         return eventMapper.toResponseDto(saved);
     }
@@ -35,7 +42,10 @@ public class EventServiceImpl implements EventService{
     @Override
     public EventResponseDto getEvent(Long id) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Event", id));
+                .orElseThrow(() -> {
+                    log.info("Событие с id {} не найдено", id);
+                    return new EntityNotFoundException("Event", id);
+                });
 
         return eventMapper.toResponseDto(event);
     }
