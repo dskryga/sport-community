@@ -2,6 +2,7 @@ package ru.skriagin.community.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.skriagin.community.dto.user.UserCreateDto;
 import ru.skriagin.community.dto.user.UserResponseDto;
@@ -17,10 +18,17 @@ public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponseDto createUser(UserCreateDto userCreateDto) {
+        if(userRepository.findByUsername(userCreateDto.getUsername()).isPresent()) {
+            throw new RuntimeException("Пользователь с таким именем уже существует");
+        }
         User createdUser = userMapper.toEntity(userCreateDto);
+
+        createdUser.setPassword(passwordEncoder.encode(userCreateDto.getPassword()));
+
         createdUser = userRepository.save(createdUser);
         log.info("SERVICE: Пользователь с id {} и именем {} создан", createdUser.getId(), createdUser.getUsername());
         return userMapper.toResponseDto(createdUser);

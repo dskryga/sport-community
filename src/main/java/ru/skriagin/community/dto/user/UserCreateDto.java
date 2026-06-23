@@ -16,4 +16,7 @@ public class UserCreateDto {
     @NotBlank(message = "Необходимо указать имя пользователя")
     @Size(min = 3, max = 32, message = "Имя пользователя должно быть от 3 до 32 символов")
     private String username;
+    @NotBlank(message = "Необходимо указать пароль")
+    @Size(min = 6, max = 100, message = "Пароль должен быть от 6 до 100 символов")
+    private String password;
 }
