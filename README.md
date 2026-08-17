@@ -24,7 +24,6 @@ Pet-проект для демонстрации навыков разработ
 - PostgreSQL 16 + PostGIS 3.4
 - Liquibase (управление миграциями)
 - Maven
-- Testcontainers (интеграционные тесты)
 
 ### Инфраструктура
 - Docker / Docker Compose
