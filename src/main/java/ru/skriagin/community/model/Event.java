@@ -33,4 +33,8 @@ public class Event {
 
     @Column(name = "datetime", nullable = false)
     private LocalDateTime dateTime;
+
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 }

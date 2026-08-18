@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.skriagin.community.dto.category.CategoryResponseDto;
+import ru.skriagin.community.dto.user.UserResponseDto;
 
 import java.time.LocalDateTime;
 
@@ -19,4 +20,5 @@ public class EventResponseDto {
     private Double latitude;
     private Double longitude;
     private LocalDateTime dateTime;
+    private UserResponseDto author;
 }

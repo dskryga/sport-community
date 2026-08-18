@@ -9,17 +9,21 @@ import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
 import ru.skriagin.community.model.Category;
 import ru.skriagin.community.model.Event;
+import ru.skriagin.community.model.User;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+uses = {CategoryMapper.class, UserMapper.class})
 public abstract class EventMapper {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", source = "categoryId", qualifiedByName = "mapCategory")
+    @Mapping(target = "category", expression = "java(category)")
+    @Mapping(target = "author", expression = "java(author)")
     @Mapping(target = "location", source = "eventCreateDto", qualifiedByName = "mapLocation")
-    public abstract Event toEntity(EventCreateDto eventCreateDto, Category category);
+    public abstract Event toEntity(EventCreateDto eventCreateDto, @Context Category category, @Context User author);
 
     @Mapping(target = "category", source = "category")
+    @Mapping(target = "author", source = "author")
     @Mapping(target = "latitude", source = "location", qualifiedByName = "extractLatitude")
     @Mapping(target = "longitude", source = "location", qualifiedByName = "extractLongitude")
     public abstract EventResponseDto toResponseDto(Event event);
@@ -43,7 +47,7 @@ public abstract class EventMapper {
                 new Coordinate(dto.getLongitude(), dto.getLatitude())
         );
     }
-
+    @Deprecated
     @Named("mapCategory")
     protected Category mapCategory(Long categoryId, @Context Category categoryParam) {
         return categoryParam;

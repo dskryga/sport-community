@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-event-author
+      author: Daniil
+      changes:
+        - addColumn:
+            tableName: events
+            columns:
+              - column:
+                  name: author_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: events
+            baseColumnNames: author_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_events_author
+            onDelete: CASCADE
+            onUpdate: CASCADE

@@ -10,8 +10,10 @@ import ru.skriagin.community.mapper.CategoryMapper;
 import ru.skriagin.community.mapper.EventMapper;
 import ru.skriagin.community.model.Category;
 import ru.skriagin.community.model.Event;
+import ru.skriagin.community.model.User;
 import ru.skriagin.community.repository.CategoryRepository;
 import ru.skriagin.community.repository.EventRepository;
+import ru.skriagin.community.service.user.UserService;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final UserService userService;
 
     @Override
     public EventResponseDto createEvent(EventCreateDto eventCreateDto) {
@@ -31,7 +34,9 @@ public class EventServiceImpl implements EventService {
                     return new EntityNotFoundException("Category", eventCreateDto.getCategoryId());
                 });
 
-        Event event = eventMapper.toEntity(eventCreateDto, category);
+        User author = userService.getCurrentUser();
+
+        Event event = eventMapper.toEntity(eventCreateDto, category, author);
         Event saved = eventRepository.save(event);
 
         log.info("Событие с id {} сохранено", event.getId());

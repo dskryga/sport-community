@@ -14,10 +14,10 @@ import java.util.Date;
 @Component
 @Slf4j
 public class JwtUtils {
-    @org.springframework.beans.factory.annotation.Value("{app.jwt.secret}")
+    @org.springframework.beans.factory.annotation.Value("${app.jwt.secret}")
     private String secret;
 
-    @Value("{app.jwt.expiration-ms}")
+    @Value("${app.jwt.expiration-ms}")
     private long expirationMs;
 
     private SecretKey getSingingKey() {
