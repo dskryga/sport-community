@@ -10,7 +10,7 @@ import ru.skriagin.community.dto.event.EventResponseDto;
 import ru.skriagin.community.service.event.EventService;
 
 @RestController
-@RequestMapping("/auth/events")
+@RequestMapping("/api/events")
 @RequiredArgsConstructor
 @Slf4j
 public class PrivateEventController {
