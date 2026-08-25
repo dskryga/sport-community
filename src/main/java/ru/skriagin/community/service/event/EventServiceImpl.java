@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
+import ru.skriagin.community.dto.event.EventSearchDto;
 import ru.skriagin.community.exception.EntityNotFoundException;
 import ru.skriagin.community.mapper.CategoryMapper;
 import ru.skriagin.community.mapper.EventMapper;
@@ -13,7 +14,10 @@ import ru.skriagin.community.model.Event;
 import ru.skriagin.community.model.User;
 import ru.skriagin.community.repository.CategoryRepository;
 import ru.skriagin.community.repository.EventRepository;
+import ru.skriagin.community.repository.specification.EventSpecifications;
 import ru.skriagin.community.service.user.UserService;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -53,5 +57,13 @@ public class EventServiceImpl implements EventService {
                 });
 
         return eventMapper.toResponseDto(event);
+    }
+
+    @Override
+    public List<EventResponseDto> searchEvents(EventSearchDto searchDto) {
+        log.info("SERVICE: поиск событий по параметрам {}", searchDto);
+        return eventRepository.findAll(EventSpecifications.fromSearchParams(searchDto)).stream()
+                .map(eventMapper::toResponseDto)
+                .toList();
     }
 }

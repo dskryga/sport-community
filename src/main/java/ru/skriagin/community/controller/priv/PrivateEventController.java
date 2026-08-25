@@ -7,7 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
+import ru.skriagin.community.dto.event.EventSearchDto;
 import ru.skriagin.community.service.event.EventService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/events")
@@ -22,6 +25,12 @@ public class PrivateEventController {
     public EventResponseDto createEvent(@RequestBody @Valid EventCreateDto eventCreateDto) {
         log.info("CONTROLLER: получен запрос на создание события {}", eventCreateDto);
         return eventService.createEvent(eventCreateDto);
+    }
+
+    @GetMapping
+    public List<EventResponseDto> searchEvents(@Valid @ModelAttribute EventSearchDto searchDto) {
+        log.info("CONTROLLER: получен запрос на поиск событий {}", searchDto);
+        return eventService.searchEvents(searchDto);
     }
 
 }

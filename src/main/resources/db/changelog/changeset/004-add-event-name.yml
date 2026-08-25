@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-event-name
+      author: Daniil
+      changes:
+        - addColumn:
+            tableName: events
+            columns:
+              - column:
+                  name: name
+                  type: varchar(150)
+                  constraints:
+                    nullable: false

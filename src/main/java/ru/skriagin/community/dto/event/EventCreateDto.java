@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 public class EventCreateDto {
     @NotNull(message = "Требуется ID категории")
     private Long categoryId;
+    @NotBlank(message = "Требуется название события")
+    @Size(max = 150, message = "Название не может превышать 150 символов")
+    private String name;
     @Size(max = 1000, message = "Описание не может превышать 1000 символов")
     private String description;
     @NotNull(message = "У события должна быть дата")

@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class EventResponseDto {
     private Long id;
     private CategoryResponseDto category;
+    private String name;
     private String description;
     private Double latitude;
     private Double longitude;

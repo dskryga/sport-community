@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changeset/002-add-password-and-role.yml
   - include:
      file: db/changelog/changeset/003-add-event-author.yml
+  - include:
+      file: db/changelog/changeset/004-add-event-name.yml

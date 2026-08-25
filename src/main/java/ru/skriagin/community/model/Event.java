@@ -25,6 +25,9 @@ public class Event {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
