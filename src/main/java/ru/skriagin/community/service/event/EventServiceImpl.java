@@ -6,9 +6,12 @@ import org.springframework.stereotype.Service;
 import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
 import ru.skriagin.community.dto.event.EventSearchDto;
+import ru.skriagin.community.dto.user.UserResponseDto;
 import ru.skriagin.community.exception.EntityNotFoundException;
+import ru.skriagin.community.exception.ParticipantAlreadyJoinedException;
 import ru.skriagin.community.mapper.CategoryMapper;
 import ru.skriagin.community.mapper.EventMapper;
+import ru.skriagin.community.mapper.UserMapper;
 import ru.skriagin.community.model.Category;
 import ru.skriagin.community.model.Event;
 import ru.skriagin.community.model.User;
@@ -29,6 +32,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @Override
     public EventResponseDto createEvent(EventCreateDto eventCreateDto) {
@@ -64,6 +68,56 @@ public class EventServiceImpl implements EventService {
         log.info("SERVICE: поиск событий по параметрам {}", searchDto);
         return eventRepository.findAll(EventSpecifications.fromSearchParams(searchDto)).stream()
                 .map(eventMapper::toResponseDto)
+                .toList();
+    }
+
+    @Override
+    public UserResponseDto joinEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event", eventId));
+
+        User currentUser = userService.getCurrentUser();
+
+        boolean alreadyJoined = event.getParticipants().stream()
+                .anyMatch(participant -> participant.getId().equals(currentUser.getId()));
+        if (alreadyJoined) {
+            throw new ParticipantAlreadyJoinedException(eventId, currentUser.getId());
+        }
+
+        event.getParticipants().add(currentUser);
+        eventRepository.save(event);
+
+        log.info("Пользователь {} присоединился к событию {}", currentUser.getId(), eventId);
+
+        return userMapper.toResponseDto(currentUser);
+    }
+
+    @Override
+    public void leaveEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event", eventId));
+
+        User currentUser = userService.getCurrentUser();
+
+        boolean removed = event.getParticipants()
+                .removeIf(participant -> participant.getId().equals(currentUser.getId()));
+        if (!removed) {
+            throw new EntityNotFoundException("User %d is not a participant of event %d"
+                    .formatted(currentUser.getId(), eventId));
+        }
+
+        eventRepository.save(event);
+
+        log.info("Пользователь {} покинул событие {}", currentUser.getId(), eventId);
+    }
+
+    @Override
+    public List<UserResponseDto> getParticipants(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event", eventId));
+
+        return event.getParticipants().stream()
+                .map(userMapper::toResponseDto)
                 .toList();
     }
 }

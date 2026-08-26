@@ -9,6 +9,8 @@ import lombok.Setter;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "events")
@@ -40,4 +42,12 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
+
+    @ManyToMany
+    @JoinTable(
+            name = "event_participants",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> participants = new HashSet<>();
 }
