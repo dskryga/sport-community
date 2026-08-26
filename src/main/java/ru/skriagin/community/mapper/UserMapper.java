@@ -19,5 +19,6 @@ public interface UserMapper {
         return role != null ? role.name().replace("ROLE_", "") : null;
     }
 
+    @Mapping(target = "participatingEvents", ignore = true)
     UserResponseDto toResponseDto(User user);
 }

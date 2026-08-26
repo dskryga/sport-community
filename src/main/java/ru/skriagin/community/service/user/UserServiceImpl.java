@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import ru.skriagin.community.dto.user.UserCreateDto;
 import ru.skriagin.community.dto.user.UserResponseDto;
 import ru.skriagin.community.exception.EntityNotFoundException;
+import ru.skriagin.community.mapper.EventMapper;
 import ru.skriagin.community.mapper.UserMapper;
 import ru.skriagin.community.model.User;
+import ru.skriagin.community.repository.EventRepository;
 import ru.skriagin.community.repository.UserRepository;
 
 @Service
@@ -21,6 +23,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EventRepository eventRepository;
+    private final EventMapper eventMapper;
 
     @Override
     public UserResponseDto createUser(UserCreateDto userCreateDto) {
@@ -43,7 +47,15 @@ public class UserServiceImpl implements UserService {
                     log.info("SERVICE: Пользователь с id {} не найден", id);
                     return new EntityNotFoundException("User", id);
                 });
-        return userMapper.toResponseDto(userRepository.getById(id));
+
+        UserResponseDto responseDto = userMapper.toResponseDto(user);
+        responseDto.setParticipatingEvents(
+                eventRepository.findByParticipants_Id(id).stream()
+                        .map(eventMapper::toResponseDto)
+                        .toList()
+        );
+
+        return responseDto;
     }
 
     @Override
