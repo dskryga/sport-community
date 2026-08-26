@@ -14,4 +14,6 @@ public interface EventService {
     UserResponseDto joinEvent(Long eventId);
     void leaveEvent(Long eventId);
     List<UserResponseDto> getParticipants(Long eventId);
+    EventResponseDto updateEvent(Long id, EventCreateDto eventUpdateDto);
+    void deleteEvent(Long id);
 }

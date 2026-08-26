@@ -28,6 +28,13 @@ public abstract class EventMapper {
     @Mapping(target = "longitude", source = "location", qualifiedByName = "extractLongitude")
     public abstract EventResponseDto toResponseDto(Event event);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "author", ignore = true)
+    @Mapping(target = "participants", ignore = true)
+    @Mapping(target = "category", expression = "java(category)")
+    @Mapping(target = "location", source = "eventCreateDto", qualifiedByName = "mapLocation")
+    public abstract void updateEntityFromDto(EventCreateDto eventCreateDto, @MappingTarget Event event, @Context Category category);
+
     @Named("extractLongitude")
     protected Double extractLongitude(Point point) {
         return point != null ? point.getX() : null;

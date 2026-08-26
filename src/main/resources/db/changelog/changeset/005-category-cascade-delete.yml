@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: category-cascade-delete
+      author: Daniil
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: events
+            constraintName: fk_events_category
+
+        - addForeignKeyConstraint:
+            baseTableName: events
+            baseColumnNames: category_id
+            referencedTableName: categories
+            referencedColumnNames: id
+            constraintName: fk_events_category
+            onDelete: CASCADE
+            onUpdate: CASCADE

@@ -120,4 +120,29 @@ public class EventServiceImpl implements EventService {
                 .map(userMapper::toResponseDto)
                 .toList();
     }
+
+    @Override
+    public EventResponseDto updateEvent(Long id, EventCreateDto eventUpdateDto) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Event", id));
+
+        Category category = categoryRepository.findById(eventUpdateDto.getCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Category", eventUpdateDto.getCategoryId()));
+
+        eventMapper.updateEntityFromDto(eventUpdateDto, event, category);
+        Event saved = eventRepository.save(event);
+
+        log.info("Событие с id {} обновлено", id);
+
+        return eventMapper.toResponseDto(saved);
+    }
+
+    @Override
+    public void deleteEvent(Long id) {
+        if (!eventRepository.existsById(id)) {
+            throw new EntityNotFoundException("Event", id);
+        }
+        eventRepository.deleteById(id);
+        log.info("Событие с id {} удалено", id);
+    }
 }

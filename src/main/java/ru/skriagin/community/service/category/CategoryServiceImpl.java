@@ -36,4 +36,13 @@ public class CategoryServiceImpl implements CategoryService {
                 });
         return categoryMapper.toResponseDto(category);
     }
+
+    @Override
+    public void deleteCategory(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new EntityNotFoundException("Category", id);
+        }
+        categoryRepository.deleteById(id);
+        log.info("Категория с id {} удалена", id);
+    }
 }

@@ -11,6 +11,7 @@ import ru.skriagin.community.dto.user.UserResponseDto;
 import ru.skriagin.community.exception.EntityNotFoundException;
 import ru.skriagin.community.mapper.EventMapper;
 import ru.skriagin.community.mapper.UserMapper;
+import ru.skriagin.community.model.Role;
 import ru.skriagin.community.model.User;
 import ru.skriagin.community.repository.EventRepository;
 import ru.skriagin.community.repository.UserRepository;
@@ -71,5 +72,30 @@ public class UserServiceImpl implements UserService {
             return (User) principal;
         }
         throw new RuntimeException("Cant get current user");
+    }
+
+    @Override
+    public UserResponseDto changeUserRole(Long id, Role role) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.info("SERVICE: Пользователь с id {} не найден", id);
+                    return new EntityNotFoundException("User", id);
+                });
+
+        user.setRole(role);
+        User saved = userRepository.save(user);
+
+        log.info("Роль пользователя с id {} изменена на {}", id, role);
+
+        return userMapper.toResponseDto(saved);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new EntityNotFoundException("User", id);
+        }
+        userRepository.deleteById(id);
+        log.info("SERVICE: Пользователь с id {} удалён", id);
     }
 }
