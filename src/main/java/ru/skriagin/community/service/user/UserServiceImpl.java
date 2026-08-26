@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.skriagin.community.dto.user.UserCreateDto;
+import ru.skriagin.community.dto.user.UserProfileUpdateDto;
 import ru.skriagin.community.dto.user.UserResponseDto;
 import ru.skriagin.community.exception.EntityNotFoundException;
 import ru.skriagin.community.mapper.EventMapper;
@@ -49,9 +50,13 @@ public class UserServiceImpl implements UserService {
                     return new EntityNotFoundException("User", id);
                 });
 
+        return toResponseDtoWithEvents(user);
+    }
+
+    private UserResponseDto toResponseDtoWithEvents(User user) {
         UserResponseDto responseDto = userMapper.toResponseDto(user);
         responseDto.setParticipatingEvents(
-                eventRepository.findByParticipants_Id(id).stream()
+                eventRepository.findByParticipants_Id(user.getId()).stream()
                         .map(eventMapper::toResponseDto)
                         .toList()
         );
@@ -97,5 +102,24 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.deleteById(id);
         log.info("SERVICE: Пользователь с id {} удалён", id);
+    }
+
+    @Override
+    public UserResponseDto updateProfile(UserProfileUpdateDto userProfileUpdateDto) {
+        User currentUser = getCurrentUser();
+
+        userMapper.updateEntityFromDto(userProfileUpdateDto, currentUser);
+        if (userProfileUpdateDto.getHomeLatitude() != null && userProfileUpdateDto.getHomeLongitude() != null) {
+            currentUser.setHomeLocation(userMapper.mapHomeLocation(
+                    userProfileUpdateDto.getHomeLatitude(),
+                    userProfileUpdateDto.getHomeLongitude()
+            ));
+        }
+
+        User saved = userRepository.save(currentUser);
+
+        log.info("SERVICE: Профиль пользователя с id {} обновлён", saved.getId());
+
+        return toResponseDtoWithEvents(saved);
     }
 }

@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-user-profile-fields
+      author: Daniil
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: description
+                  type: text
+              - column:
+                  name: home_location
+                  type: geometry
+              - column:
+                  name: birth_date
+                  type: date
+              - column:
+                  name: gender
+                  type: varchar(16)

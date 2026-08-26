@@ -9,3 +9,7 @@ databaseChangeLog:
       file: db/changelog/changeset/004-add-event-name.yml
   - include:
       file: db/changelog/changeset/005-category-cascade-delete.yml
+  - include:
+      file: db/changelog/changeset/006-add-comments.yml
+  - include:
+      file: db/changelog/changeset/007-add-user-profile-fields.yml
