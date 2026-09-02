@@ -2,6 +2,9 @@ package ru.skriagin.community.service.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
@@ -33,6 +36,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryMapper categoryMapper;
     private final UserService userService;
     private final UserMapper userMapper;
+    private final CacheManager cacheManager;
 
     @Override
     public EventResponseDto createEvent(EventCreateDto eventCreateDto) {
@@ -53,6 +57,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Cacheable(value = "events", key = "#id")
     public EventResponseDto getEvent(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> {
@@ -89,6 +94,8 @@ public class EventServiceImpl implements EventService {
 
         log.info("Пользователь {} присоединился к событию {}", currentUser.getId(), eventId);
 
+        evict("users", currentUser.getId());
+
         return userMapper.toResponseDto(currentUser);
     }
 
@@ -109,6 +116,8 @@ public class EventServiceImpl implements EventService {
         eventRepository.save(event);
 
         log.info("Пользователь {} покинул событие {}", currentUser.getId(), eventId);
+
+        evict("users", currentUser.getId());
     }
 
     @Override
@@ -134,6 +143,8 @@ public class EventServiceImpl implements EventService {
 
         log.info("Событие с id {} обновлено", id);
 
+        evict("events", id);
+
         return eventMapper.toResponseDto(saved);
     }
 
@@ -144,5 +155,14 @@ public class EventServiceImpl implements EventService {
         }
         eventRepository.deleteById(id);
         log.info("Событие с id {} удалено", id);
+
+        evict("events", id);
+    }
+
+    private void evict(String cacheName, Object key) {
+        Cache cache = cacheManager.getCache(cacheName);
+        if (cache != null) {
+            cache.evict(key);
+        }
     }
 }

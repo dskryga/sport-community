@@ -2,6 +2,9 @@ package ru.skriagin.community.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
+    private final CacheManager cacheManager;
 
     @Override
     public UserResponseDto createUser(UserCreateDto userCreateDto) {
@@ -43,6 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "users", key = "#id")
     public UserResponseDto getUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> {
@@ -92,16 +97,23 @@ public class UserServiceImpl implements UserService {
 
         log.info("Роль пользователя с id {} изменена на {}", id, role);
 
+        evict("users", id);
+        evict("userDetails", saved.getUsername());
+
         return userMapper.toResponseDto(saved);
     }
 
     @Override
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("User", id);
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User", id));
+
         userRepository.deleteById(id);
         log.info("SERVICE: Пользователь с id {} удалён", id);
+
+        evict("users", id);
+        evict("userDetails", user.getUsername());
+        clearCache("events");
     }
 
     @Override
@@ -120,6 +132,23 @@ public class UserServiceImpl implements UserService {
 
         log.info("SERVICE: Профиль пользователя с id {} обновлён", saved.getId());
 
+        evict("users", saved.getId());
+        evict("userDetails", saved.getUsername());
+
         return toResponseDtoWithEvents(saved);
+    }
+
+    private void evict(String cacheName, Object key) {
+        Cache cache = cacheManager.getCache(cacheName);
+        if (cache != null) {
+            cache.evict(key);
+        }
+    }
+
+    private void clearCache(String cacheName) {
+        Cache cache = cacheManager.getCache(cacheName);
+        if (cache != null) {
+            cache.clear();
+        }
     }
 }
