@@ -32,6 +32,21 @@ app:
   jwt:
     secret: jTexB946VXnIS3diqLDQin52T1bCy8Tj
     expiration-ms: 86400000 # 24 hours
+  actuator:
+    username: prometheus
+    password: pR0m3th3usM3trics!2026
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 logging:
   level:

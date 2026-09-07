@@ -28,5 +28,56 @@ services:
       timeout: 10s
       retries: 5
 
+  redis-exporter:
+    container_name: community-redis-exporter
+    image: oliver006/redis_exporter:v1.62.0
+    environment:
+      - REDIS_ADDR=redis://community-redis:6379
+    ports:
+      - "9121:9121"
+    depends_on:
+      - community-redis
+
+  postgres-exporter:
+    container_name: community-postgres-exporter
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    environment:
+      - DATA_SOURCE_NAME=postgresql://dbuser:12345@community-db:5432/community?sslmode=disable
+    ports:
+      - "9187:9187"
+    depends_on:
+      - community-db
+
+  prometheus:
+    container_name: community-prometheus
+    image: prom/prometheus:v2.55.1
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis-exporter
+      - postgres-exporter
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  grafana:
+    container_name: community-grafana
+    image: grafana/grafana:11.3.1
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+
 volumes:
   postgres_data:
