@@ -13,7 +13,9 @@ import ru.skriagin.community.mapper.CategoryMapper;
 import ru.skriagin.community.model.Category;
 import ru.skriagin.community.repository.CategoryRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponseDto> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(categoryMapper::toResponseDto)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override

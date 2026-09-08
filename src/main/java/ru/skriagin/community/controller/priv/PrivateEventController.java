@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.skriagin.community.dto.common.PageResponseDto;
 import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
 import ru.skriagin.community.dto.event.EventSearchDto;
@@ -30,7 +31,7 @@ public class PrivateEventController {
     }
 
     @GetMapping
-    public List<EventResponseDto> searchEvents(@Valid @ModelAttribute EventSearchDto searchDto) {
+    public PageResponseDto<EventResponseDto> searchEvents(@Valid @ModelAttribute EventSearchDto searchDto) {
         log.info("CONTROLLER: получен запрос на поиск событий {}", searchDto);
         return eventService.searchEvents(searchDto);
     }

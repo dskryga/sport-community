@@ -5,7 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.skriagin.community.dto.common.PageResponseDto;
 import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
 import ru.skriagin.community.dto.event.EventSearchDto;
@@ -69,11 +73,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventResponseDto> searchEvents(EventSearchDto searchDto) {
+    public PageResponseDto<EventResponseDto> searchEvents(EventSearchDto searchDto) {
         log.info("SERVICE: поиск событий по параметрам {}", searchDto);
-        return eventRepository.findAll(EventSpecifications.fromSearchParams(searchDto)).stream()
-                .map(eventMapper::toResponseDto)
-                .toList();
+
+        PageRequest pageRequest = PageRequest.of(
+                searchDto.getPage(),
+                searchDto.getSize(),
+                Sort.by(Sort.Direction.DESC, "id")
+        );
+
+        Page<EventResponseDto> page = eventRepository
+                .findAll(EventSpecifications.fromSearchParams(searchDto), pageRequest)
+                .map(eventMapper::toResponseDto);
+
+        return PageResponseDto.from(page);
     }
 
     @Override
