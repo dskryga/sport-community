@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.skriagin.community.contracts.NotificationEvent;
+import ru.skriagin.community.contracts.NotificationType;
 import ru.skriagin.community.dto.user.UserCreateDto;
 import ru.skriagin.community.dto.user.UserProfileUpdateDto;
 import ru.skriagin.community.dto.user.UserResponseDto;
@@ -17,8 +19,12 @@ import ru.skriagin.community.mapper.EventMapper;
 import ru.skriagin.community.mapper.UserMapper;
 import ru.skriagin.community.model.Role;
 import ru.skriagin.community.model.User;
+import ru.skriagin.community.notification.NotificationEventPublisher;
 import ru.skriagin.community.repository.EventRepository;
 import ru.skriagin.community.repository.UserRepository;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
     private final CacheManager cacheManager;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     @Override
     public UserResponseDto createUser(UserCreateDto userCreateDto) {
@@ -43,6 +50,14 @@ public class UserServiceImpl implements UserService {
 
         createdUser = userRepository.save(createdUser);
         log.info("SERVICE: Пользователь с id {} и именем {} создан", createdUser.getId(), createdUser.getUsername());
+
+        notificationEventPublisher.publish(new NotificationEvent(
+                UUID.randomUUID(),
+                NotificationType.USER_REGISTERED,
+                createdUser.getUsername() + "@example.com",
+                Map.of("username", createdUser.getUsername())
+        ));
+
         return userMapper.toResponseDto(createdUser);
     }
 

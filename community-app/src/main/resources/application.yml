@@ -30,6 +30,9 @@ spring:
   cache:
     type: redis
 
+  kafka:
+    bootstrap-servers: localhost:9092
+
 app:
   jwt:
     secret: jTexB946VXnIS3diqLDQin52T1bCy8Tj

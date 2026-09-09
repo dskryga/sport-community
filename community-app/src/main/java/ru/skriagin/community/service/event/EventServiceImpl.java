@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.skriagin.community.contracts.NotificationEvent;
+import ru.skriagin.community.contracts.NotificationType;
 import ru.skriagin.community.dto.common.PageResponseDto;
 import ru.skriagin.community.dto.event.EventCreateDto;
 import ru.skriagin.community.dto.event.EventResponseDto;
@@ -22,12 +24,15 @@ import ru.skriagin.community.mapper.UserMapper;
 import ru.skriagin.community.model.Category;
 import ru.skriagin.community.model.Event;
 import ru.skriagin.community.model.User;
+import ru.skriagin.community.notification.NotificationEventPublisher;
 import ru.skriagin.community.repository.CategoryRepository;
 import ru.skriagin.community.repository.EventRepository;
 import ru.skriagin.community.repository.specification.EventSpecifications;
 import ru.skriagin.community.service.user.UserService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +46,7 @@ public class EventServiceImpl implements EventService {
     private final UserService userService;
     private final UserMapper userMapper;
     private final CacheManager cacheManager;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     @Override
     public EventResponseDto createEvent(EventCreateDto eventCreateDto) {
@@ -109,6 +115,13 @@ public class EventServiceImpl implements EventService {
 
         evict("users", currentUser.getId());
 
+        notificationEventPublisher.publish(new NotificationEvent(
+                UUID.randomUUID(),
+                NotificationType.EVENT_JOINED,
+                currentUser.getUsername() + "@example.com",
+                Map.of("eventId", eventId.toString(), "eventName", event.getName())
+        ));
+
         return userMapper.toResponseDto(currentUser);
     }
 
@@ -131,6 +144,13 @@ public class EventServiceImpl implements EventService {
         log.info("Пользователь {} покинул событие {}", currentUser.getId(), eventId);
 
         evict("users", currentUser.getId());
+
+        notificationEventPublisher.publish(new NotificationEvent(
+                UUID.randomUUID(),
+                NotificationType.EVENT_LEFT,
+                currentUser.getUsername() + "@example.com",
+                Map.of("eventId", eventId.toString(), "eventName", event.getName())
+        ));
     }
 
     @Override
