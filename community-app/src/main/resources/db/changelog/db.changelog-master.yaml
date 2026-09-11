@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/changeset/006-add-comments.yml
   - include:
       file: db/changelog/changeset/007-add-user-profile-fields.yml
+  - include:
+      file: db/changelog/changeset/008-add-user-avatar-key.yml

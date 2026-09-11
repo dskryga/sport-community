@@ -33,6 +33,11 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 app:
   jwt:
     secret: jTexB946VXnIS3diqLDQin52T1bCy8Tj
@@ -40,6 +45,9 @@ app:
   actuator:
     username: prometheus
     password: pR0m3th3usM3trics!2026
+  storage:
+    avatars:
+      base-dir: ./uploads/avatars
 
 management:
   endpoints:

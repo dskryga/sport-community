@@ -25,4 +25,5 @@ public class UserResponseDto {
     private Double homeLongitude;
     private LocalDate birthDate;
     private Gender gender;
+    private boolean hasAvatar;
 }

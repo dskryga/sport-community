@@ -49,6 +49,9 @@ public class User implements UserDetails {
     @Column(name = "gender", length = 16)
     private Gender gender;
 
+    @Column(name = "avatar_key")
+    private String avatarKey;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.getAuthority()));

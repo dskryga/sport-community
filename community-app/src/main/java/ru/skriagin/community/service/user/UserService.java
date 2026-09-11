@@ -1,5 +1,7 @@
 package ru.skriagin.community.service.user;
 
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skriagin.community.dto.user.UserCreateDto;
 import ru.skriagin.community.dto.user.UserProfileUpdateDto;
 import ru.skriagin.community.dto.user.UserResponseDto;
@@ -18,5 +20,11 @@ public interface UserService {
     void deleteUser(Long id);
 
     UserResponseDto updateProfile(UserProfileUpdateDto userProfileUpdateDto);
+
+    UserResponseDto uploadAvatar(MultipartFile file);
+
+    UserResponseDto deleteAvatar();
+
+    Resource getAvatar(Long userId);
 
 }

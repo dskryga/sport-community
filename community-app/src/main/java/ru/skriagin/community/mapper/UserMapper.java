@@ -37,6 +37,7 @@ public interface UserMapper {
     @Mapping(target = "participatingEvents", ignore = true)
     @Mapping(target = "homeLatitude", source = "homeLocation", qualifiedByName = "extractHomeLatitude")
     @Mapping(target = "homeLongitude", source = "homeLocation", qualifiedByName = "extractHomeLongitude")
+    @Mapping(target = "hasAvatar", expression = "java(user.getAvatarKey() != null)")
     UserResponseDto toResponseDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

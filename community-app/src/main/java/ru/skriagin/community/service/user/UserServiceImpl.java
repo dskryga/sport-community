@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skriagin.community.contracts.NotificationEvent;
 import ru.skriagin.community.contracts.NotificationType;
 import ru.skriagin.community.dto.user.UserCreateDto;
@@ -22,6 +24,7 @@ import ru.skriagin.community.model.User;
 import ru.skriagin.community.notification.NotificationEventPublisher;
 import ru.skriagin.community.repository.EventRepository;
 import ru.skriagin.community.repository.UserRepository;
+import ru.skriagin.community.storage.AvatarStorageService;
 
 import java.util.Map;
 import java.util.UUID;
@@ -38,6 +41,7 @@ public class UserServiceImpl implements UserService {
     private final EventMapper eventMapper;
     private final CacheManager cacheManager;
     private final NotificationEventPublisher notificationEventPublisher;
+    private final AvatarStorageService avatarStorageService;
 
     @Override
     public UserResponseDto createUser(UserCreateDto userCreateDto) {
@@ -151,6 +155,59 @@ public class UserServiceImpl implements UserService {
         evict("userDetails", saved.getUsername());
 
         return toResponseDtoWithEvents(saved);
+    }
+
+    @Override
+    public UserResponseDto uploadAvatar(MultipartFile file) {
+        User currentUser = getCurrentUser();
+
+        String oldKey = currentUser.getAvatarKey();
+        String newKey = avatarStorageService.store(currentUser.getId(), file);
+        currentUser.setAvatarKey(newKey);
+
+        User saved = userRepository.save(currentUser);
+
+        if (oldKey != null) {
+            avatarStorageService.delete(oldKey);
+        }
+
+        log.info("SERVICE: Аватар пользователя с id {} обновлён", saved.getId());
+
+        evict("users", saved.getId());
+        evict("userDetails", saved.getUsername());
+
+        return toResponseDtoWithEvents(saved);
+    }
+
+    @Override
+    public UserResponseDto deleteAvatar() {
+        User currentUser = getCurrentUser();
+
+        String oldKey = currentUser.getAvatarKey();
+        if (oldKey != null) {
+            currentUser.setAvatarKey(null);
+            userRepository.save(currentUser);
+            avatarStorageService.delete(oldKey);
+        }
+
+        log.info("SERVICE: Аватар пользователя с id {} удалён", currentUser.getId());
+
+        evict("users", currentUser.getId());
+        evict("userDetails", currentUser.getUsername());
+
+        return toResponseDtoWithEvents(currentUser);
+    }
+
+    @Override
+    public Resource getAvatar(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User", userId));
+
+        if (user.getAvatarKey() == null) {
+            throw new EntityNotFoundException("Avatar for user %d".formatted(userId));
+        }
+
+        return avatarStorageService.load(user.getAvatarKey());
     }
 
     private void evict(String cacheName, Object key) {
